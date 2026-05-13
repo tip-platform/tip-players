@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-deptg: 0
+          fetch-depth: 0
 
       - name: Setup node
         uses: actions/setup-node@v6
@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-deptg: 0
+          fetch-depth: 0
 
       - name: Setup Golang
         uses: actions/setup-go@v6
@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-deptg: 0
+          fetch-depth: 0
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v6
