@@ -60,7 +60,7 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           skip-cache: true
-          version-file: v2.12
+          version: v2.12
 
   lint-release:
     if: github.base_ref == 'main' && github.event_name == 'pull_request'
