@@ -1,0 +1,54 @@
+version: 2
+
+updates:
+  # Go modules
+  - package-ecosystem: gomod
+
+    directory: /
+
+    target-branch: develop
+
+    open-pull-requests-limit: 5
+
+    labels: [dependencies, go]
+
+    commit-message:
+      prefix: chore
+      include: scope
+
+    groups:
+      go-dependencies:
+        patterns:
+          - "*"
+
+    schedule:
+      interval: monthly
+      day: monday
+      time: 07:00
+      timezone: America/Bogota
+
+  # Pipelines
+  - package-ecosystem: github-actions
+
+    directory: /
+
+    target-branch: develop
+
+    open-pull-requests-limit: 3
+
+    labels: [dependencies, ci]
+
+    commit-message:
+      prefix: chore
+      include: scope
+
+    groups:
+      go-dependencies:
+        patterns:
+          - "*"
+
+    schedule:
+      interval: monthly
+      day: monday
+      time: 07:00
+      timezone: America/Bogota
