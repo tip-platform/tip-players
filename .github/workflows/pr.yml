@@ -7,6 +7,10 @@ on:
     branches: [main, develop]
     types: [opened, synchronize, reopened, edited]
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
@@ -36,6 +40,28 @@ jobs:
           npx commitlint  --from ${{ github.event.pull_request.base.sha }} \
                           --to ${{ github.event.pull_request.head.sha }} \
                           --verbose
+
+  lint-code:
+    needs: lint-commit
+    name: quality code
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-deptg: 0
+
+      - name: Setup Golang
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
+          go-version: "1.26.x"
+          cache-dependency-path: "go.sum"
+
+      - name: linting
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v2.12
+          args: --timeout=5m
 
   lint-release:
     if: github.base_ref == 'main' && github.event_name == 'pull_request'
