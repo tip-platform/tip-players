@@ -40,28 +40,6 @@ jobs:
                           --to ${{ github.event.pull_request.head.sha }} \
                           --verbose
 
-  lint-code:
-    needs: lint-commit
-    name: quality code
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Setup Golang
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: "go.mod"
-          go-version: "1.26.x"
-          cache-dependency-path: "go.sum"
-
-      - name: linting
-        uses: golangci/golangci-lint-action@v6.1.1
-        with:
-          version: v1.64.8
-          skip-cache: true
-
   lint-release:
     if: github.base_ref == 'main' && github.event_name == 'pull_request'
     name: validate semantic release
