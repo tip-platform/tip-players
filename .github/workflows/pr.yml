@@ -1,13 +1,21 @@
 name: Pull Request CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    branches: [develop, main]
+    branches: [main, develop]
     types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
   lint-commit:
-    name: validate
+    if: github.base_ref == 'develop'
+    name: validate convetional commits
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
@@ -24,8 +32,21 @@ jobs:
         run: npm install -D @commitlint/cli @commitlint/config-conventional
 
       - name: Validate commit
-        if: github.base_ref == 'develop'
         run: |
           npx commitlint  --from ${{ github.event.pull_request.base.sha }} \
                           --to ${{ github.event.pull_request.head.sha }} \
                           --verbose
+
+  lint-release:
+    if: github.base_ref == 'main' && github.event_name == 'pull_request'
+    name: validate semantic release
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-deptg: 0
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
