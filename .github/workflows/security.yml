@@ -30,7 +30,6 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: docker build -t repo-scan:${{ github.sha }} -f ContainerFile .
-        continue-on-error: true
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
@@ -39,7 +38,7 @@ jobs:
           format: sarif
           severity: "CRITICAL,HIGH"
           ignore-unfixed: true
-          exit-code: 0
+          exit-code: 1
           vuln-type: "os,library"
           output: trivy-results.sarif
 
