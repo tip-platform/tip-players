@@ -1,0 +1,72 @@
+version: 2
+
+updates:
+  - package-ecosystem: gomod
+
+    directory: /
+
+    target-branch: develop
+
+    open-pull-requests-limit: 5
+
+    labels: [dependencies, go]
+
+    commit-message:
+      prefix: chore
+      include: scope
+
+    groups:
+      go-dependencies:
+        patterns:
+          - "*"
+
+    schedule:
+      interval: monthly
+      day: monday
+      time: 07:00
+      timezone: America/Bogota
+
+  - package-ecosystem: github-actions
+
+    directory: /
+
+    target-branch: develop
+
+    open-pull-requests-limit: 3
+
+    labels: [dependencies, ci]
+
+    commit-message:
+      prefix: chore
+      include: scope
+
+    groups:
+      actions-dependencies:
+        patterns:
+          - "*"
+
+    schedule:
+      interval: monthly
+      day: monday
+      time: 07:00
+      timezone: America/Bogota
+
+  - package-ecosystem: docker
+
+    directory: /
+
+    target-branch: develop
+
+    open-pull-requests-limit: 2
+
+    labels: [dependencies, docker]
+
+    commit-message:
+      prefix: chore
+      include: scope
+
+    schedule:
+      interval: monthly
+      day: monday
+      time: 07:00
+      timezone: America/Bogota
