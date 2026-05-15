@@ -29,6 +29,7 @@ func main() {
 	server := grpc.NewServer()
 	pb.RegisterPlayerServiceServer(server, handler)
 
+	//nolint:gosec // Required for container networking
 	lis, e := net.Listen("tcp", ":50051")
 
 	if e != nil {

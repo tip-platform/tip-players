@@ -2,9 +2,10 @@
 package schema
 
 import (
-	"github.com/tip-platform/tip-players/internal/domain/entity"
 	"strings"
 	"time"
+
+	"github.com/tip-platform/tip-players/internal/domain/entity"
 )
 
 // Player is the domain model exposed by the schema layer.
@@ -48,7 +49,7 @@ func WithCountryCode(code string) Option {
 
 func WithAge(age uint8) Option {
 	return func(p *entity.PlayerRecord) error {
-		if age <= 0 {
+		if age <= 0 || age > 120 {
 			return DomainError{Operation: "create", Entity: "player", Field: "age", Reason: ErrMustBePositive}
 		}
 		p.Age = age
