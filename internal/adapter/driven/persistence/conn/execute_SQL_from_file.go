@@ -63,6 +63,9 @@ func executeSelect(db *sql.DB, query string, params ...any) (map[string]any, err
 	}
 
 	if !rows.Next() {
+		if e := rows.Err(); e != nil {
+			return nil, e
+		}
 		return nil, sql.ErrNoRows
 	}
 

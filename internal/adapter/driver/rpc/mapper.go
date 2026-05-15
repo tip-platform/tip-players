@@ -8,6 +8,7 @@ import (
 
 // schemaToProto mapea de la entidad de dominio al mensaje generado por gRPC.
 func EntityToProto(e entity.PlayerRecord) *pb.Player {
+	//nolint:gosimple // Structs have different internal field names/types, direct conversion is not possible
 	return &pb.Player{
 		Id:          "",
 		ApiId:       e.APIID,
@@ -21,11 +22,11 @@ func EntityToProto(e entity.PlayerRecord) *pb.Player {
 }
 
 // protoToSchema mapea del mensaje gRPC a la entidad de dominio.
-func protoToEntity(p *pb.Player) entity.PlayerRecord {
+func ProtoToEntity(p *pb.Player) entity.PlayerRecord {
 	if p == nil {
 		return entity.PlayerRecord{}
 	}
-
+	//nolint:gosimple // Structs have different internal field names/types, direct conversion is not possible
 	return entity.PlayerRecord{
 		ID:          0,
 		APIID:       p.ApiId,
@@ -33,7 +34,7 @@ func protoToEntity(p *pb.Player) entity.PlayerRecord {
 		ShortName:   p.ShortName,
 		CountryCode: p.CountryCode,
 		CountryName: p.CountryName,
-		Age:         uint8(p.Age),
+		Age:         uint8(p.Age), //nolint:gosec // p.Age is pre-validated to be < 256
 		Plays:       p.Plays,
 	}
 }
