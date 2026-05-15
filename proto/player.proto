@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package player.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/tip-platform/tip-players/proto;playerv1";
+
+// ─────────────────────────────────────────
+// Messages
+// ─────────────────────────────────────────
+
+message Player {
+  string                    id           = 1;
+  uint32                    api_id       = 2;
+  string                    name         = 3;
+  string                    short_name   = 4;
+  string                    country_code = 5;
+  string                    country_name = 6;
+  uint32                    age          = 7;
+  string                    plays        = 8;
+  google.protobuf.Timestamp turned_pro   = 9;
+}
+
+// ─────────────────────────────────────────
+// GetPlayer
+// ─────────────────────────────────────────
+
+message GetPlayerRequest {
+  bytes id = 1;
+}
+
+message GetPlayerResponse {
+  Player player = 1;
+}
+
+// ─────────────────────────────────────────
+// ListPlayers
+// ─────────────────────────────────────────
+
+message ListPlayersRequest {
+  uint32          limit        = 1;
+  optional string country_code = 2;
+  optional string search       = 3;
+}
+
+message ListPlayersResponse {
+  repeated Player players = 1;
+  uint32          total   = 2;
+}
+
+// ─────────────────────────────────────────
+// Service
+// ─────────────────────────────────────────
+
+service PlayerService {
+  rpc GetPlayer   (GetPlayerRequest)   returns (GetPlayerResponse);
+  rpc ListPlayers (ListPlayersRequest) returns (ListPlayersResponse);
+}

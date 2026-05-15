@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ContainerFile
+    ports:
+      - 8080:8080
+    env_file: .env
+    depends_on:
+      - db-player
+
+  db-player:
+    container_name: mssql_player_db
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    ports:
+      - "${DB_PJ_PORT}:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SQL_PASSWORD}
+      - MSSQL_PID=${DB_USER}
+    volumes:
+      - player_data:/var/opt/mssql
+    restart: unless-stopped
+
+volumes:
+  player_data:
