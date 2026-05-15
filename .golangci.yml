@@ -1,0 +1,32 @@
+linters:
+  enable:
+    # ── Correctness
+    - govet
+    - errcheck
+    - staticcheck
+    - contextcheck
+    - rowserrcheck
+    - gosimple
+    - ineffassign
+    - unused
+
+    # ── Style / Formatting
+    - gofmt
+    - goimports
+    - misspell
+    - whitespace
+
+    # ── Bugs potenciales
+    - nilnil
+    - nilerr
+    - unparam
+
+    # ── Seguridad
+    - gosec
+
+issues:
+  max-same-issues: 5
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
