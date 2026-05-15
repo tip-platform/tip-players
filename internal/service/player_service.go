@@ -34,7 +34,7 @@ func (s *PlayerService) Add(c context.Context, player entity.PlayerRecord) (enti
 		return entity.PlayerRecord{}, e
 	}
 
-	if e := s.repo.Insert(c, SchemaToEntity(p)); e != nil {
+	if e := s.repo.Insert(c, p); e != nil {
 		return entity.PlayerRecord{}, e
 	}
 
@@ -48,7 +48,7 @@ func (s *PlayerService) Find(c context.Context, id uint32) (entity.PlayerRecord,
 		return entity.PlayerRecord{}, e
 	}
 
-	return EntityToSchema(p), nil
+	return p, nil
 }
 
 func (s *PlayerService) Modify(c context.Context, player entity.PlayerRecord) (entity.PlayerRecord, error) {
@@ -67,7 +67,7 @@ func (s *PlayerService) Modify(c context.Context, player entity.PlayerRecord) (e
 		return entity.PlayerRecord{}, e
 	}
 
-	if e = s.repo.Update(c, SchemaToEntity(p)); e != nil {
+	if e = s.repo.Update(c, p); e != nil {
 		return entity.PlayerRecord{}, e
 	}
 
