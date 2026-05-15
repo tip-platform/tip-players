@@ -40,6 +40,25 @@ jobs:
                           --to ${{ github.event.pull_request.head.sha }} \
                           --verbose
 
+  golangci-lint:
+    if: github.base_ref == 'develop'
+    name: golangci-lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
   lint-release:
     if: github.base_ref == 'main' && github.event_name == 'pull_request'
     name: validate semantic release
