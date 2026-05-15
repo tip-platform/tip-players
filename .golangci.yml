@@ -1,7 +1,6 @@
 version: "2"
 
 linters:
-  default: none
   enable:
     # ── Correctness
     - govet
@@ -26,24 +25,6 @@ linters:
 
     # ── Seguridad
     - gosec
-
-  settings:
-    errcheck:
-      check-type-assertions: true
-
-    govet:
-      enable-all: true
-      disable:
-        - fieldalignment
-
-    staticcheck:
-      checks: [all]
-
-    gosec:
-      excludes: [G104]
-
-    exhaustive:
-      default-signifies-exhaustive: true
 
 issues:
   max-same-issues: 5
