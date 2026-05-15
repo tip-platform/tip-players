@@ -23,7 +23,7 @@ updates:
     schedule:
       interval: monthly
       day: monday
-      time: 07:00
+      time: "07:00"
       timezone: America/Bogota
 
   - package-ecosystem: github-actions
@@ -48,7 +48,7 @@ updates:
     schedule:
       interval: monthly
       day: monday
-      time: 07:00
+      time: "07:00"
       timezone: America/Bogota
 
   - package-ecosystem: docker
@@ -68,5 +68,5 @@ updates:
     schedule:
       interval: monthly
       day: monday
-      time: 07:00
+      time: "07:00"
       timezone: America/Bogota
