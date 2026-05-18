@@ -82,4 +82,9 @@ jobs:
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
         with:
-          args: -Dsonar.projectKey=tip-platform -Dsonar.organization=tip-platform-org -Dsonar.sources=.
+          args: >-
+            -Dsonar.organization=tip-platform-org
+            -Dsonar.projectName=tip-platform
+            -Dsonar.projectKey=tip-platform
+            -Dsonar.sources=cmd,internal
+            -Dsonar.verbose=true
