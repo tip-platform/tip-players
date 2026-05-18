@@ -68,13 +68,13 @@ jobs:
           role-to-assume: arn:aws:iam::006834263887:role/github-actions-tip-players
           aws-region: us-east-2
 
-      - name: Load SONAR_TOKEN from SSM
+      - name: Load SONAR_TOKEN Secrets Manager
         run: |
-          SONAR_TOKEN="$(aws ssm get-parameter \
-          --name '/tip/sonar/token' \
-          --with-decryption \
-          --query 'Parameter.Value' \
-          --output text)"
+          SECRET_JSON=$(aws secretsmanager get-secret-value \
+            --secret-id "tip-players/config" \
+            --query "SecretString" \
+            --output text)
+          SONAR_TOKEN=$(echo $SECRET_JSON | jq -r '.SONAR_TOKEN')
           echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
 
       - name: SonarQube scan
