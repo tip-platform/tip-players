@@ -13,9 +13,13 @@ concurrency:
   group: security-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  security:
-    name: security
+  sarif:
+    name: Container/Image scanning
     runs-on: ubuntu-24.04
 
     permissions:
@@ -48,3 +52,32 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
           category: trivy
+
+  sast:
+    name: Static Aplication Security Testing
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          audience: sts.amazonaws.com
+          role-to-assume: arn:aws:iam::006834263887:role/github-actions-tip-players
+          aws-region: us-east-2
+
+      - name: Load SONAR_TOKEN from SSM
+        run: |
+          SONAR_TOKEN="$(aws ssm get-parameter \
+          --name '/tip/sonar/token' \
+          --with-decryption \
+          --query 'Parameter.Value' \
+          --output text)"
+          echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@8.0.0
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
