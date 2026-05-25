@@ -5,9 +5,25 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	_ "github.com/microsoft/go-mssqldb"
 )
+
+func pingWithRetry(db *sql.DB, attempts int, delay time.Duration) error {
+	var lastErr error
+
+	for i := 0; i < attempts; i++ {
+		if e := db.Ping(); e == nil {
+			return nil
+		} else {
+			lastErr = e
+			time.Sleep(delay)
+		}
+	}
+
+	return lastErr
+}
 
 type Client struct {
 	DB *sql.DB
@@ -37,44 +53,67 @@ func readDBConfigFromEnv() (dbConfig, error) {
 	return config, nil
 }
 
-func buildConnString(config dbConfig) string {
-	return fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", config.user, config.password, config.host, config.port, config.dbname)
+// buildConnString ahora acepta el nombre de la base de datos dinámicamente
+func buildConnString(config dbConfig, dbname string) string {
+	return fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", config.user, config.password, config.host, config.port, dbname)
 }
 
-func ensureDatabaseAndTables(connString, dbname string) (*sql.DB, error) {
-	masterDB, e := sql.Open("sqlserver", connString)
+func ensureDatabaseAndTables(config dbConfig) (*sql.DB, error) {
+	// 1. Conectamos inicialmente a 'master' para verificar/crear la base de datos del proyecto
+	masterConnString := buildConnString(config, "master")
+
+	masterDB, e := sql.Open("sqlserver", masterConnString)
 
 	if e != nil {
 		return nil, fmt.Errorf("failed to connect to master: %w", e)
 	}
 
-	defer masterDB.Close()
-
-	if e := masterDB.Ping(); e != nil {
+	// Usamos un flag manual o cerramos masterDB explícitamente en lugar de defer defer,
+	// para asegurarnos de que libere la conexión antes de que la app intente migrar las tablas.
+	if e := pingWithRetry(masterDB, 12, 2*time.Second); e != nil {
+		masterDB.Close()
 		return nil, fmt.Errorf("failed to ping master: %w", e)
 	}
 
-	if _, e := ExecuteSQLFromFile(masterDB, "CREATE_DATABASE.sql", dbname); e != nil {
+	// Crear la base de datos (Ejecuta en el contexto de 'master')
+	if _, e := ExecuteSQLFromFile(masterDB, "CREATE_DATABASE.sql", config.dbname); e != nil {
+		masterDB.Close()
 		return nil, fmt.Errorf("failed to create database: %w", e)
 	}
+	masterDB.Close() // Ya no necesitamos la sesión master, cerramos de forma limpia
 
-	if _, e := ExecuteSQLFromFile(masterDB, "CREATE_TABLES.sql"); e != nil {
-		return nil, fmt.Errorf("failed to create table: %w", e)
+	// 2. Ahora abrimos una conexión enfocada DIRECTAMENTE en la base de datos de la app para las tablas
+	appConnString := buildConnString(config, config.dbname)
+
+	appDB, e := sql.Open("sqlserver", appConnString)
+
+	if e != nil {
+		return nil, fmt.Errorf("failed to connect to app database: %w", e)
 	}
 
-	return masterDB, nil
+	if e := pingWithRetry(appDB, 12, 2*time.Second); e != nil {
+		appDB.Close()
+		return nil, fmt.Errorf("failed to ping app database: %w", e)
+	}
+
+	// Crear las tablas (Ejecuta ya posicionado en tu base de datos destino)
+	if _, e := ExecuteSQLFromFile(appDB, "CREATE_TABLES.sql"); e != nil {
+		appDB.Close()
+		return nil, fmt.Errorf("failed to create tables: %w", e)
+	}
+
+	// 3. Devolvemos el pool 'appDB' que está VIVO, listo y conectado a la DB final
+	return appDB, nil
 }
 
 func NewClient() (*sql.DB, error) {
 	config, e := readDBConfigFromEnv()
-
 	if e != nil {
 		return nil, e
 	}
 
-	connString := buildConnString(config)
-
-	return ensureDatabaseAndTables(connString, config.dbname)
+	// Pasamos toda la configuración a la función encargada de inicializar
+	return ensureDatabaseAndTables(config)
 }
 
 func (c *Client) Close() error {
