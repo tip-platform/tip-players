@@ -12,3 +12,4 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='players' AND xtype='U')
       turned_pro DATETIME2
     );
   PRINT 'Table players created successfully in tip_players.';
+END
