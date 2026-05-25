@@ -4,18 +4,18 @@ package rpc
 import (
 	"context"
 
-	"github.com/tip-platform/tip-players/internal/port/input"
+	"github.com/tip-platform/tip-players/internal/app/port/input"
 	pb "github.com/tip-platform/tip-players/proto"
 )
 
 type PlayerHandler struct {
 	pb.UnimplementedPlayerServiceServer
-	repo *PlayerRepositoryAdapter
+	service input.PlayerService
 }
 
 func NewPlayerHandler(playerService input.PlayerService) *PlayerHandler {
 	return &PlayerHandler{
-		repo: NewPlayerRepositoryAdapter(playerService),
+		service: playerService,
 	}
 }
 
@@ -27,7 +27,7 @@ func (h *PlayerHandler) GetPlayer(c context.Context, req *pb.GetPlayerRequest) (
 		id = uint32(req.Id[0])
 	}
 
-	d, e := h.repo.Find(c, id)
+	d, e := h.service.Find(c, id)
 
 	if e != nil {
 		return nil, e

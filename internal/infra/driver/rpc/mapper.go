@@ -2,12 +2,12 @@
 package rpc
 
 import (
-	"github.com/tip-platform/tip-players/internal/domain/entity"
+	"github.com/tip-platform/tip-players/internal/domain/schema"
 	pb "github.com/tip-platform/tip-players/proto"
 )
 
 // schemaToProto mapea de la entidad de dominio al mensaje generado por gRPC.
-func EntityToProto(e entity.PlayerRecord) *pb.Player {
+func EntityToProto(e schema.Player) *pb.Player {
 	//nolint:gosimple // Structs have different internal field names/types, direct conversion is not possible
 	return &pb.Player{
 		Id:          "",
@@ -22,12 +22,12 @@ func EntityToProto(e entity.PlayerRecord) *pb.Player {
 }
 
 // protoToSchema mapea del mensaje gRPC a la entidad de dominio.
-func ProtoToEntity(p *pb.Player) entity.PlayerRecord {
+func ProtoToEntity(p *pb.Player) schema.Player {
 	if p == nil {
-		return entity.PlayerRecord{}
+		return schema.Player{}
 	}
 	//nolint:gosimple // Structs have different internal field names/types, direct conversion is not possible
-	return entity.PlayerRecord{
+	return schema.Player{
 		ID:          0,
 		APIID:       p.ApiId,
 		Name:        p.Name,
