@@ -12,10 +12,10 @@ import (
 )
 
 type Config struct {
-	Env          string
-	GRPCAddr     string
-	HealthAddr   string
-	HealthEnable bool
+	Env                  string
+	GRPCAddr             string
+	HealthAddr           string
+	HealthEnable         bool
 	GRPCReflectionEnable bool
 }
 
