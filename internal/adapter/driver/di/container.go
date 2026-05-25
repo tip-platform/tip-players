@@ -8,6 +8,7 @@ import (
 
 type Container struct {
 	PlayerService *service.PlayerService
+	PlayerStore   *persistence.PlayerStore
 }
 
 func NewContainer() (*Container, error) {
@@ -21,5 +22,5 @@ func NewContainer() (*Container, error) {
 
 	playerService := service.NewPlayerService(repo)
 
-	return &Container{PlayerService: playerService}, nil
+	return &Container{PlayerService: playerService, PlayerStore: store}, nil
 }

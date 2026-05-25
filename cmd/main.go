@@ -2,43 +2,93 @@
 package main
 
 import (
-	"log"
+	"context"
+	"fmt"
 	"net"
+	"os"
+	"time"
 
-	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 
+	config "github.com/tip-platform/tip-players/internal/adapter"
 	"github.com/tip-platform/tip-players/internal/adapter/driver/di"
+	"github.com/tip-platform/tip-players/internal/adapter/driver/health"
 	"github.com/tip-platform/tip-players/internal/adapter/driver/rpc"
 	pb "github.com/tip-platform/tip-players/proto"
 )
 
 func main() {
-	if e := godotenv.Load(); e != nil {
-		log.Printf(".env not loaded: %v", e)
+	cfg, e := config.Load()
+
+	if e != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load config: %v\n", e)
+		os.Exit(1)
 	}
 
 	container, e := di.NewContainer()
 
 	if e != nil {
-		log.Fatalf("Failed to create container: %v", e)
+		fmt.Fprintf(os.Stderr, "Failed to create container: %v\n", e)
+		os.Exit(1)
+	}
+
+	if container.PlayerService == nil {
+		fmt.Fprintln(os.Stderr, "Failed to create container: PlayerService is nil")
+		os.Exit(1)
 	}
 
 	handler := rpc.NewPlayerHandler(container.PlayerService)
 
 	server := grpc.NewServer()
+
+	// Health services live in adapters; main only wires them.
+	_ = health.RegisterGRPC(server, func(ctx context.Context) error {
+		if container.PlayerStore == nil {
+			return nil
+		}
+
+		ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+
+		defer cancel()
+
+		return container.PlayerStore.Ping(ctx)
+	})
+
 	pb.RegisterPlayerServiceServer(server, handler)
 
+	grpcAddr := cfg.GRPCAddr
+
 	//nolint:gosec // Required for container networking
-	lis, e := net.Listen("tcp", ":50051")
+	lis, e := net.Listen("tcp", grpcAddr)
 
 	if e != nil {
-		log.Fatalf("Failed to listen: %v", e)
+		fmt.Fprintf(os.Stderr, "Failed to listen: %v\n", e)
+		os.Exit(1)
 	}
 
-	log.Println("gRPC server listening on :50051")
+	// Optional HTTP health endpoints.
+	healthAddr := cfg.HealthAddr
+	if cfg.HealthEnable {
+		_ = health.StartHTTP(healthAddr, func(ctx context.Context) error {
+			if container.PlayerStore == nil {
+				return nil
+			}
+			ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+
+			defer cancel()
+
+			return container.PlayerStore.Ping(ctx)
+		})
+	}
+
+	fmt.Printf("gRPC server listening on %s\n", grpcAddr)
+
+	if cfg.HealthEnable {
+		fmt.Printf("HTTP health listening on %s (GET /healthz, /readyz)\n", healthAddr)
+	}
 
 	if e := server.Serve(lis); e != nil {
-		log.Fatalf("Failed to serve: %v", e)
+		fmt.Fprintf(os.Stderr, "Failed to serve: %v\n", e)
+		os.Exit(1)
 	}
 }

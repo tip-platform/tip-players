@@ -1,2 +1,23 @@
+# Environment / local secrets
 .env
+.env.*
+
+# IntelliJ HTTP Client environments (often contain tokens)
+http-client.env.json
+http-client.private.env.json
+.idea/httpRequests/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Go build artifacts
+bin/
+dist/
+*.exe
+*.out
+*.test
+
+# Policy AWS
 policy.json

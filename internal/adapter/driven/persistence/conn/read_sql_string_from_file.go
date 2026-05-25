@@ -7,9 +7,21 @@ import (
 )
 
 func ReadSQLStringFromFile(filename string) (string, error) {
-	path := filepath.Join("internal/adapter/driven/persistence/sql", filename)
+	// Prefer resolving from the executable directory (works in containers and multi-env).
+	if exe, err := os.Executable(); err == nil {
+		base := filepath.Dir(exe)
 
-	content, err := os.ReadFile(path)
+		abs := filepath.Join(base, "internal/adapter/driven/persistence/sql", filename)
 
-	return string(content), err
+		if b, e := os.ReadFile(abs); e == nil {
+			return string(b), nil
+		}
+	}
+
+	// Fallback to relative path (local dev).
+	rel := filepath.Join("internal/adapter/driven/persistence/sql", filename)
+
+	b, err := os.ReadFile(rel)
+
+	return string(b), err
 }

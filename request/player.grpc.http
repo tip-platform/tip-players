@@ -1,0 +1,11 @@
+# gRPC requests (IntelliJ HTTP Client)
+# Requires plugins: Protocol Buffers + gRPC
+# Select environment in IDE: local / compose
+
+### ListPlayers
+GRPC {{grpc_host}}:{{grpc_port}}/player.v1.PlayerService/ListPlayers
+Content-Type: application/json
+
+{
+  "limit": 10
+}
