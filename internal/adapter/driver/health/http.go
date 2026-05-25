@@ -47,7 +47,7 @@ func StartHTTP(addr string, ready ReadyFunc) *http.Server {
 		_, _ = w.Write([]byte("ready"))
 	})
 
-	srv := &http.Server{Addr: addr, Handler: mux}
+	srv := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
 
 	go func() {
 		_ = srv.ListenAndServe()
