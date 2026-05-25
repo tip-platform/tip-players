@@ -18,6 +18,6 @@ EXPOSE 50051 8080
 
 COPY --from=build /app/main .
 
-COPY internal/adapter/driven/persistence/sql ./internal/adapter/driven/persistence/sql
+COPY internal/infra/driven/persistence/sql ./internal/infra/driven/persistence/sql
 
 ENTRYPOINT ["./main"]

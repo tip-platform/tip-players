@@ -2,12 +2,13 @@
 package di
 
 import (
-	"github.com/tip-platform/tip-players/internal/adapter/driven/persistence"
-	"github.com/tip-platform/tip-players/internal/service"
+	"github.com/tip-platform/tip-players/internal/app"
+	"github.com/tip-platform/tip-players/internal/app/port/input"
+	"github.com/tip-platform/tip-players/internal/infra/driven/persistence"
 )
 
 type Container struct {
-	PlayerService *service.PlayerService
+	PlayerService input.PlayerService
 	PlayerStore   *persistence.PlayerStore
 }
 
@@ -18,9 +19,9 @@ func NewContainer() (*Container, error) {
 		return nil, e
 	}
 
-	repo := persistence.NewPlayerRepositoryAdapter(store)
+	repo := persistence.NewMSSQLPlayerRepositoryAdapter(store)
 
-	playerService := service.NewPlayerService(repo)
+	playerService := app.NewPlayerService(repo)
 
 	return &Container{PlayerService: playerService, PlayerStore: store}, nil
 }

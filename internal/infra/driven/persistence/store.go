@@ -6,8 +6,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/tip-platform/tip-players/internal/adapter/driven/persistence/conn"
-	"github.com/tip-platform/tip-players/internal/domain/entity"
+	"github.com/tip-platform/tip-players/internal/domain/schema"
+	"github.com/tip-platform/tip-players/internal/infra/driven/persistence/conn"
 )
 
 type PlayerStore struct {
@@ -27,7 +27,7 @@ func (s *PlayerStore) Ping(c context.Context) error {
 	return s.db.PingContext(c)
 }
 
-func (s *PlayerStore) Insert(c context.Context, r entity.PlayerRecord) error {
+func (s *PlayerStore) Insert(c context.Context, r schema.Player) error {
 	_, e := conn.ExecuteSQLFromFile(
 		s.db,
 		"INSERT_PLAYER.sql",
@@ -48,13 +48,13 @@ func (s *PlayerStore) Insert(c context.Context, r entity.PlayerRecord) error {
 	return nil
 }
 
-func (s *PlayerStore) Select(c context.Context, id uint32) (entity.PlayerRecord, error) {
-	var r entity.PlayerRecord
+func (s *PlayerStore) Select(c context.Context, id uint32) (schema.Player, error) {
+	var r schema.Player
 
 	query, e := conn.ReadSQLStringFromFile("SELECT_PLAYER_BY_ID.sql")
 
 	if e != nil {
-		return entity.PlayerRecord{}, fmt.Errorf("failed to read SQL file: %w", e)
+		return schema.Player{}, fmt.Errorf("failed to read SQL file: %w", e)
 	}
 
 	row := s.db.QueryRow(query, id)
@@ -72,13 +72,13 @@ func (s *PlayerStore) Select(c context.Context, id uint32) (entity.PlayerRecord,
 	)
 
 	if e != nil {
-		return entity.PlayerRecord{}, e
+		return schema.Player{}, e
 	}
 
 	return r, nil
 }
 
-func (s *PlayerStore) Update(c context.Context, r entity.PlayerRecord) error {
+func (s *PlayerStore) Update(c context.Context, r schema.Player) error {
 	_, e := conn.ExecuteSQLFromFile(
 		s.db,
 		"UPDATE_PLAYER.sql",
