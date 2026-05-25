@@ -1,13 +1,12 @@
-// Package service implements player application services.
-package service
+// Package app implements player application services.
+package app
 
 import (
 	"context"
 
-	"github.com/tip-platform/tip-players/internal/domain/entity"
+	"github.com/tip-platform/tip-players/internal/app/port/input"
+	"github.com/tip-platform/tip-players/internal/app/port/output"
 	"github.com/tip-platform/tip-players/internal/domain/schema"
-	"github.com/tip-platform/tip-players/internal/port/input"
-	"github.com/tip-platform/tip-players/internal/port/output"
 )
 
 type PlayerService struct {
@@ -18,7 +17,7 @@ func NewPlayerService(repo output.PlayerRepository) *PlayerService {
 	return &PlayerService{repo: repo}
 }
 
-func (s *PlayerService) Add(c context.Context, player entity.PlayerRecord) (entity.PlayerRecord, error) {
+func (s *PlayerService) Add(c context.Context, player schema.Player) (schema.Player, error) {
 	p, e := schema.NewPlayer(
 		player.APIID,
 		player.Name,
@@ -31,27 +30,27 @@ func (s *PlayerService) Add(c context.Context, player entity.PlayerRecord) (enti
 	p.TurnedPro = player.TurnedPro
 
 	if e != nil {
-		return entity.PlayerRecord{}, e
+		return schema.Player{}, e
 	}
 
 	if e := s.repo.Insert(c, p); e != nil {
-		return entity.PlayerRecord{}, e
+		return schema.Player{}, e
 	}
 
 	return p, nil
 }
 
-func (s *PlayerService) Find(c context.Context, id uint32) (entity.PlayerRecord, error) {
+func (s *PlayerService) Find(c context.Context, id uint32) (schema.Player, error) {
 	p, e := s.repo.Select(c, id)
 
 	if e != nil {
-		return entity.PlayerRecord{}, e
+		return schema.Player{}, e
 	}
 
 	return p, nil
 }
 
-func (s *PlayerService) Modify(c context.Context, player entity.PlayerRecord) (entity.PlayerRecord, error) {
+func (s *PlayerService) Modify(c context.Context, player schema.Player) (schema.Player, error) {
 	p, e := schema.NewPlayer(
 		player.APIID,
 		player.Name,
@@ -64,11 +63,11 @@ func (s *PlayerService) Modify(c context.Context, player entity.PlayerRecord) (e
 	p.TurnedPro = player.TurnedPro
 
 	if e != nil {
-		return entity.PlayerRecord{}, e
+		return schema.Player{}, e
 	}
 
 	if e = s.repo.Update(c, p); e != nil {
-		return entity.PlayerRecord{}, e
+		return schema.Player{}, e
 	}
 
 	return p, nil
