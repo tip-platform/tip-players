@@ -13,9 +13,13 @@ concurrency:
   group: security-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  security:
-    name: security
+  sarif:
+    name: Container/Image scanning
     runs-on: ubuntu-24.04
 
     permissions:
@@ -30,7 +34,6 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: docker build -t repo-scan:${{ github.sha }} -f ContainerFile .
-        continue-on-error: true
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
@@ -39,7 +42,7 @@ jobs:
           format: sarif
           severity: "CRITICAL,HIGH"
           ignore-unfixed: true
-          exit-code: 0
+          exit-code: 1
           vuln-type: "os,library"
           output: trivy-results.sarif
 
@@ -49,3 +52,39 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
           category: trivy
+
+  sast:
+    name: Static Aplication Security Testing
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          audience: sts.amazonaws.com
+          role-to-assume: arn:aws:iam::006834263887:role/github-actions-tip-players
+          aws-region: us-east-2
+
+      - name: Load SONAR_TOKEN Secrets Manager
+        run: |
+          SECRET_JSON=$(aws secretsmanager get-secret-value \
+            --secret-id "tip-players/config" \
+            --query "SecretString" \
+            --output text)
+          SONAR_TOKEN=$(echo $SECRET_JSON | jq -r '.SONAR_TOKEN')
+          echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+        with:
+          args: >-
+            -Dsonar.organization=tip-platform
+            -Dsonar.projectName=tip-platform
+            -Dsonar.projectKey=tip-platform
+            -Dsonar.sources=cmd,internal
+            -Dsonar.verbose=true
