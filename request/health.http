@@ -1,0 +1,8 @@
+# Health endpoints (HTTP)
+# Select environment in IDE: local / compose
+
+### Liveness
+GET http://{{health_host}}:{{health_port}}/healthz
+
+### Readiness
+GET http://{{health_host}}:{{health_port}}/readyz

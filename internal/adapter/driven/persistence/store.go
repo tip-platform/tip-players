@@ -23,6 +23,10 @@ func NewPlayerStore() (*PlayerStore, error) {
 	return &PlayerStore{db: db}, nil
 }
 
+func (s *PlayerStore) Ping(c context.Context) error {
+	return s.db.PingContext(c)
+}
+
 func (s *PlayerStore) Insert(c context.Context, r entity.PlayerRecord) error {
 	_, e := conn.ExecuteSQLFromFile(
 		s.db,
