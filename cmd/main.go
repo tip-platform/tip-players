@@ -9,11 +9,12 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
-	config "github.com/tip-platform/tip-players/internal/adapter"
-	"github.com/tip-platform/tip-players/internal/adapter/driver/di"
-	"github.com/tip-platform/tip-players/internal/adapter/driver/health"
-	"github.com/tip-platform/tip-players/internal/adapter/driver/rpc"
+	"github.com/tip-platform/tip-players/internal/infra/driver/config"
+	"github.com/tip-platform/tip-players/internal/infra/driver/di"
+	"github.com/tip-platform/tip-players/internal/infra/driver/health"
+	"github.com/tip-platform/tip-players/internal/infra/driver/rpc"
 	pb "github.com/tip-platform/tip-players/proto"
 )
 
@@ -40,6 +41,9 @@ func main() {
 	handler := rpc.NewPlayerHandler(container.PlayerService)
 
 	server := grpc.NewServer()
+	if cfg.GRPCReflectionEnable {
+		reflection.Register(server)
+	}
 
 	// Health services live in adapters; main only wires them.
 	_ = health.RegisterGRPC(server, func(ctx context.Context) error {
