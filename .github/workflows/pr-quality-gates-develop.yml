@@ -112,12 +112,20 @@ jobs:
         env:
           APP_PORT: "50051"
         run: |
+          sleep 5
+          SUCCESS=false
           for i in $(seq 1 30); do
             if grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check >/dev/null 2>&1; then
+              SUCCESS=true
               break
             fi
             sleep 2
           done
+          if [ "$SUCCESS" = false ]; then
+            echo "❌ El servicio no levantó a tiempo. Mostrando logs de los contenedores:"
+            docker compose -f compose.yml logs
+            exit 1
+          fi
           grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check
 
       - name: Compose down
