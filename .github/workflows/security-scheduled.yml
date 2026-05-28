@@ -1,32 +1,24 @@
-name: Security
+name: "Security (Scheduled) — Container/Image Vulnerability Scanning | SAST"
 
 on:
-  pull_request:
-    branches: [main, develop]
-
   schedule:
     - cron: 0 11 * * 1
-
   workflow_dispatch:
 
 concurrency:
-  group: security-${{ github.ref }}
+  group: security-container-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   id-token: write
   contents: read
+  security-events: write
+  actions: read
 
 jobs:
-  sarif:
-    name: Container/Image scanning
+  container_image_vulnerability_scanning:
+    name: "Container/Image Vulnerability Scanning — Trivy"
     runs-on: ubuntu-24.04
-
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-
     steps:
       - uses: actions/checkout@v6
         with:
@@ -53,16 +45,16 @@ jobs:
           sarif_file: trivy-results.sarif
           category: trivy
 
-  sast:
-    name: Static Aplication Security Testing
+  sast_sonarqube:
+    name: "SAST — SonarQube"
     runs-on: ubuntu-24.04
-
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: aws-actions/configure-aws-credentials@v6
+      - name: "aws connection service"
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           audience: sts.amazonaws.com
           role-to-assume: arn:aws:iam::006834263887:role/github-actions-tip-players
