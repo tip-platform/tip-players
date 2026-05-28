@@ -1,0 +1,133 @@
+name: "PR (develop) — Quality Gates"
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened, edited]
+
+concurrency:
+  group: pr-develop-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scm_policy_conventional_commits:
+    name: "SCM Policy — Conventional Commits"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install commitlint
+        run: npm install -D @commitlint/cli @commitlint/config-conventional
+
+      - name: Validate commit messages
+        run: |
+          npx commitlint --from ${{ github.event.pull_request.base.sha }} \
+                        --to ${{ github.event.pull_request.head.sha }} \
+                        --verbose
+
+  build_verification_compile:
+    name: "Build Verification — Compile"
+    runs-on: ubuntu-24.04
+    needs: [scm_policy_conventional_commits]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: go build
+        run: go build ./...
+
+  static_code_quality_golangci_lint:
+    name: "Static Code Quality — golangci-lint"
+    runs-on: ubuntu-24.04
+    needs: [build_verification_compile]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          install-mode: goinstall
+          args: --timeout=5m
+
+  runtime_validation_grpc_smoke_load:
+    name: "Runtime Validation — gRPC Smoke"
+    runs-on: ubuntu-24.04
+    needs: [build_verification_compile]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install grpc tooling (grpcurl)
+        run: |
+          go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.9.3
+
+      - name: Create compose env file
+        run: |
+          cat > .env <<'EOF'
+          DB_USER=sa
+          SQL_PASSWORD=P@ssw0rd12345!
+          DB_PJ_NAME=players
+          DB_PJ_PORT=1433
+          APP_PORT=50051
+          HEALTH_PORT=8080
+          EOF
+
+      - name: Compose up (build + start)
+        run: docker compose -f compose.yml up -d --build
+
+      - name: gRPC smoke (health)
+        env:
+          APP_PORT: "50051"
+        run: |
+          sleep 5
+          SUCCESS=false
+          for i in $(seq 1 30); do
+            if grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check >/dev/null 2>&1; then
+              SUCCESS=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$SUCCESS" = false ]; then
+            echo "❌ El servicio no levantó a tiempo. Mostrando logs de los contenedores:"
+            docker compose -f compose.yml logs
+            exit 1
+          fi
+          grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check
+
+      - name: Compose down
+        if: always()
+        run: docker compose -f compose.yml down -v
