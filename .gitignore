@@ -1,6 +1,5 @@
 # Environment / local secrets
 .env
-.env.*
 
 # IntelliJ HTTP Client environments (often contain tokens)
 http-client.env.json
@@ -20,4 +19,4 @@ dist/
 *.test
 
 # Policy AWS
-policy.json
+config/policy.json
