@@ -32,7 +32,8 @@ jobs:
 
       - name: Validate commit messages
         run: |
-          npx commitlint --from ${{ github.event.pull_request.base.sha }} \
+          npx commitlint --from --config=config/.commitlintrc.json \
+                        ${{ github.event.pull_request.base.sha }} \
                         --to ${{ github.event.pull_request.head.sha }} \
                         --verbose
 
@@ -75,7 +76,7 @@ jobs:
         uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee
         with:
           install-mode: goinstall
-          args: --timeout=5m
+          args: --timeout=5m --config=config/.golangci.yml
 
   runtime_validation_grpc_smoke_load:
     name: "Runtime Validation — gRPC Smoke"
@@ -83,6 +84,18 @@ jobs:
     environment: staging
     needs: [build_verification_compile]
     timeout-minutes: 15
+    env:
+      APP_PORT: ${{ vars.APP_PORT }}
+      HEALTH_PORT: ${{ vars.HEALTH_PORT }}
+      DB_PJ_PORT: ${{ vars.DB_PJ_PORT }}
+      GRPC_ADDR: :50051
+      HEALTH_ADDR: :8080
+      HEALTH_ENABLED: "true"
+      APP_ENV: staging
+      DB_USER: ${{ vars.DB_USER }}
+      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+      DB_PJ_NAME: ${{ vars.DB_PJ_NAME }}
+
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -98,40 +111,18 @@ jobs:
         run: |
           go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.9.3
 
-      - name: Create compose env file
-        run: |
-          cat > .env <<'EOF'
-          DB_USER=sa
-          SQL_PASSWORD=P@ssw0rd12345!
-          DB_PJ_NAME=players
-          DB_PJ_PORT=1433
-          APP_PORT=50051
-          HEALTH_PORT=8080
-          EOF
-
       - name: Compose up (build + start)
-        run: docker compose -f compose.yml up -d --build
+        run: docker compose -f build/compose.yml up -d --build
 
       - name: gRPC smoke (health)
-        env:
-          APP_PORT: "50051"
         run: |
-          sleep 5
-          SUCCESS=false
           for i in $(seq 1 30); do
             if grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check >/dev/null 2>&1; then
-              SUCCESS=true
               break
             fi
-            sleep 2
           done
-          if [ "$SUCCESS" = false ]; then
-            echo "❌ El servicio no levantó a tiempo. Mostrando logs de los contenedores:"
-            docker compose -f compose.yml logs
-            exit 1
-          fi
           grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check
 
       - name: Compose down
         if: always()
-        run: docker compose -f compose.yml down -v
+        run: docker compose -f build/compose.yml down -v

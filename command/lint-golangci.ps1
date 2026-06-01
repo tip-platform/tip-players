@@ -50,7 +50,7 @@ Ensure-GolangciLint
 
 Push-Location $RootDir
 try {
-  golangci-lint run --config .golangci.yml --timeout 5m @args
+  golangci-lint run --config=config/.golangci.yml --timeout 5m @args
 } finally {
   Pop-Location
 }
