@@ -1,0 +1,67 @@
+services:
+  app:
+    container_name: player_service
+    build:
+      context: ..
+      dockerfile: build/ContainerFile
+
+    ports:
+      - "127.0.0.1:${APP_PORT}:50051"
+      - "127.0.0.1:${HEALTH_PORT}:8080"
+
+    env_file: ../.env
+    environment:
+      - DB_PJ_HOST=db-player
+      - DB_PJ_PORT=1433
+
+    depends_on:
+      db-player:
+        condition: service_healthy
+
+    networks:
+      - backend_network
+
+  db-player:
+    container_name: mssql_player_db
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    stop_grace_period: 5s
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:${DB_PJ_PORT}:1433"
+
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SQL_PASSWORD}
+      - MSSQL_PID=Developer
+
+    volumes:
+      - player_data:/var/opt/mssql
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/opt/mssql-tools18/bin/sqlcmd",
+          "-U",
+          "${DB_USER}",
+          "-P",
+          "${SQL_PASSWORD}",
+          "-C",
+          "-Q",
+          "SELECT 1",
+        ]
+
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
+    driver: bridge
+
+volumes:
+  player_data:
