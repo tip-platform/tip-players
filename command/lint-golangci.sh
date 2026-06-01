@@ -38,4 +38,4 @@ ensure_golangci_lint
 
 cd "$ROOT_DIR"
 
-golangci-lint run --config .golangci.yml --timeout 5m "$@"
+golangci-lint run --config=config/.golangci.yml --timeout 5m "$@"
