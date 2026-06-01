@@ -11,7 +11,7 @@ func ReadSQLStringFromFile(filename string) (string, error) {
 	if exe, err := os.Executable(); err == nil {
 		base := filepath.Dir(exe)
 
-		abs := filepath.Join(base, "internal/adapter/driven/persistence/sql", filename)
+		abs := filepath.Join(base, "internal/infra/driven/persistence/sql", filename)
 
 		if b, e := os.ReadFile(abs); e == nil {
 			return string(b), nil
@@ -19,7 +19,7 @@ func ReadSQLStringFromFile(filename string) (string, error) {
 	}
 
 	// Fallback to relative path (local dev).
-	rel := filepath.Join("internal/adapter/driven/persistence/sql", filename)
+	rel := filepath.Join("internal/infra/driven/persistence/sql", filename)
 
 	b, err := os.ReadFile(rel)
 
