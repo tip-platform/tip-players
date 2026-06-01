@@ -16,6 +16,7 @@ jobs:
   scm_policy_conventional_commits:
     name: "SCM Policy — Conventional Commits"
     runs-on: ubuntu-24.04
+    environment: staging
     steps:
       - uses: actions/checkout@v6
         with:
@@ -38,6 +39,7 @@ jobs:
   build_verification_compile:
     name: "Build Verification — Compile"
     runs-on: ubuntu-24.04
+    environment: staging
     needs: [scm_policy_conventional_commits]
     steps:
       - uses: actions/checkout@v6
@@ -56,7 +58,8 @@ jobs:
   static_code_quality_golangci_lint:
     name: "Static Code Quality — golangci-lint"
     runs-on: ubuntu-24.04
-    needs: [build_verification_compile]
+    environment: staging
+    needs: [scm_policy_conventional_commits]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -77,6 +80,7 @@ jobs:
   runtime_validation_grpc_smoke_load:
     name: "Runtime Validation — gRPC Smoke"
     runs-on: ubuntu-24.04
+    environment: staging
     needs: [build_verification_compile]
     timeout-minutes: 15
     steps:
