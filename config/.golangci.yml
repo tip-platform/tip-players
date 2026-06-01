@@ -1,0 +1,58 @@
+version: "2"
+
+run:
+  modules-download-mode: readonly
+  timeout: 5m
+
+linters:
+  enable:
+    # ── Correctness
+    - govet
+    - errcheck
+    - staticcheck
+    - contextcheck
+    - rowserrcheck
+    - ineffassign
+    - unused
+
+    # ── Style
+    - misspell
+    - whitespace
+
+    # ── Bugs potenciales
+    - nilnil
+    - nilerr
+    - unparam
+
+    # ── Seguridad
+    - gosec
+
+  exclusions:
+    generated: lax
+
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+
+issues:
+  max-same-issues: 5
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+  exclusions:
+    generated: lax
+
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
