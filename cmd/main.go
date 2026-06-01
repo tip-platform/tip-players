@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	pb "github.com/tip-platform/tip-players/api/proto"
 	"github.com/tip-platform/tip-players/internal/infra/driver/config"
 	"github.com/tip-platform/tip-players/internal/infra/driver/di"
 	"github.com/tip-platform/tip-players/internal/infra/driver/health"
 	"github.com/tip-platform/tip-players/internal/infra/driver/rpc"
-	pb "github.com/tip-platform/tip-players/proto"
 )
 
 func main() {
