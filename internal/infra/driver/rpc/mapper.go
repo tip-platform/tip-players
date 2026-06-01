@@ -2,8 +2,8 @@
 package rpc
 
 import (
+	pb "github.com/tip-platform/tip-players/api/proto"
 	"github.com/tip-platform/tip-players/internal/domain/schema"
-	pb "github.com/tip-platform/tip-players/proto"
 )
 
 // schemaToProto mapea de la entidad de dominio al mensaje generado por gRPC.
