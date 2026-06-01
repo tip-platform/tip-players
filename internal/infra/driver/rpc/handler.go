@@ -4,8 +4,8 @@ package rpc
 import (
 	"context"
 
+	pb "github.com/tip-platform/tip-players/api/proto"
 	"github.com/tip-platform/tip-players/internal/app/port/input"
-	pb "github.com/tip-platform/tip-players/proto"
 )
 
 type PlayerHandler struct {
