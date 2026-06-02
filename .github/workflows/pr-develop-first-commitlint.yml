@@ -1,0 +1,37 @@
+name: "PR (develop) — Convetional Commits"
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened, edited]
+
+concurrency:
+  group: pr-develop-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scm_policy_conventional_commits:
+    name: "SCM Policy — Conventional Commits"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: 24
+
+      - name: Install commitlint
+        run: npm install -D @commitlint/cli @commitlint/config-conventional
+
+      - name: Validate commit messages
+        run: |
+          npx commitlint --from --config=config/.commitlintrc.json \
+                        ${{ github.event.pull_request.base.sha }} \
+                        --to ${{ github.event.pull_request.head.sha }} \
+                        --verbose
