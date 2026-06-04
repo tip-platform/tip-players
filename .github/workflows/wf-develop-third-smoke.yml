@@ -13,7 +13,6 @@ jobs:
     name: "Runtime Validation — gRPC Smoke"
     runs-on: ubuntu-24.04
     environment: staging
-    needs: [build_verification_compile]
     timeout-minutes: 15
     env:
       APP_PORT: ${{ vars.APP_PORT }}
