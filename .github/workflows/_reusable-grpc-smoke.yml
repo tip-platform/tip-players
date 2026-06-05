@@ -6,6 +6,25 @@ on:
       ref:
         required: true
         type: string
+      app_port:
+        required: true
+        type: string
+      health_port:
+        required: true
+        type: string
+      db_pj_port:
+        required: true
+        type: string
+      db_user:
+        required: true
+        type: string
+      db_pj_name:
+        required: true
+        type: string
+
+    secrets:
+      sql_password:
+        required: true
 
 permissions:
   contents: read
@@ -18,19 +37,18 @@ jobs:
   grpc_smoke:
     name: "Runtime Validation — gRPC Smoke"
     runs-on: ubuntu-24.04
-    environment: staging
     timeout-minutes: 15
     env:
-      APP_PORT: ${{ vars.APP_PORT }}
-      HEALTH_PORT: ${{ vars.HEALTH_PORT }}
-      DB_PJ_PORT: ${{ vars.DB_PJ_PORT }}
+      APP_PORT: ${{ inputs.APP_PORT }}
+      HEALTH_PORT: ${{ inputs.HEALTH_PORT }}
+      DB_PJ_PORT: ${{ inputs.DB_PJ_PORT }}
       GRPC_ADDR: :50051
       HEALTH_ADDR: :8080
       HEALTH_ENABLED: "true"
       APP_ENV: staging
-      DB_USER: ${{ vars.DB_USER }}
+      DB_USER: ${{ inputs.DB_USER }}
       SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-      DB_PJ_NAME: ${{ vars.DB_PJ_NAME }}
+      DB_PJ_NAME: ${{ inputs.DB_PJ_NAME }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd

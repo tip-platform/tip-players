@@ -30,14 +30,22 @@ jobs:
 
   static_code_quality_golangci_lint:
     name: "Static Code Quality — golangci-lint"
-    needs: [build_verification_compile]
+    needs: [scm_policy_conventional_commits]
     uses: ./.github/workflows/_reusable-golangci_lint.yml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
 
   runtime_validation_grpc_smoke_load:
     name: "Runtime Validation — gRPC Smoke"
+    environment: staging
     needs: [build_verification_compile]
     uses: ./.github/workflows/_reusable-grpc-smoke.yml
+    secrets:
+      sql_password: ${{ secrets.SQL_PASSWORD }}
     with:
       ref: ${{ github.event.pull_request.head.sha }}
+      app_port: ${{ vars.APP_PORT }}
+      health_port: ${{ vars.HEALTH_PORT }}
+      db_pj_port: ${{ vars.DB_PJ_PORT }}
+      db_user: ${{ vars.DB_USER }}
+      db_pj_name: ${{ vars.DB_PJ_NAME }}
