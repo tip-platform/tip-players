@@ -1,15 +1,17 @@
-name: "PR (develop) — Runtime Validation"
+name: "Runtime Validation"
 
 on:
-  workflow_run:
-    workflows: ["PR (develop) — Build & Quality"]
-    types: [completed]
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
-  runtime_validation_grpc_smoke_load:
+  grpc_smoke:
     name: "Runtime Validation — gRPC Smoke"
     runs-on: ubuntu-24.04
     environment: staging
