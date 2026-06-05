@@ -48,14 +48,32 @@ jobs:
         run: |
           go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.9.3
 
+      - name: Set minimal permissions for CI scripts
+        shell: bash
+        run: |
+          chmod 500 command/ci/env-validate.sh
+          chmod 500 command/ci/env-create.sh
+          chmod 500 command/ci/compose-up.sh
+          chmod 500 command/ci/grpc-smoke.sh
+          chmod 500 command/ci/compose-down-and-clean.sh
+
+      - name: Validate staging vars/secrets
+        shell: bash
+        run: command/ci/env-validate.sh
+
+      - name: Create .env (temporary)
+        shell: bash
+        run: command/ci/env-create.sh
+
       - name: Compose up (build + start)
-        run: docker compose -f build/compose.yml up -d --build
+        shell: bash
+        run: command/ci/compose-up.sh
 
       - name: gRPC smoke (health)
-        run: |
-          chmod +x command/ci/grpc-smoke.sh
-          command/ci/grpc-smoke.sh
+        shell: bash
+        run: command/ci/grpc-smoke.sh
 
-      - name: Compose down
+      - name: Compose down + cleanup
         if: always()
-        run: docker compose -f build/compose.yml down -v
+        shell: bash
+        run: command/ci/compose-down-and-clean.sh
