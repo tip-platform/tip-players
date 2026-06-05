@@ -39,16 +39,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      APP_PORT: ${{ inputs.APP_PORT }}
-      HEALTH_PORT: ${{ inputs.HEALTH_PORT }}
-      DB_PJ_PORT: ${{ inputs.DB_PJ_PORT }}
+      APP_PORT: ${{ inputs.app_port }}
+      HEALTH_PORT: ${{ inputs.health_port }}
+      DB_PJ_PORT: ${{ inputs.db_pj_port }}
       GRPC_ADDR: :50051
       HEALTH_ADDR: :8080
       HEALTH_ENABLED: "true"
       APP_ENV: staging
-      DB_USER: ${{ inputs.DB_USER }}
-      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-      DB_PJ_NAME: ${{ inputs.DB_PJ_NAME }}
+      DB_USER: ${{ inputs.db_user }}
+      SQL_PASSWORD: ${{ secrets.sql_password }}
+      DB_PJ_NAME: ${{ inputs.db_pj_name }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
