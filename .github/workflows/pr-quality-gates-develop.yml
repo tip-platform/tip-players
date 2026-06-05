@@ -35,28 +35,6 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha }}
 
-  staging_gate:
-    name: "Staging Gate — Unlock Environment"
-    needs: [build_verification_compile]
-    runs-on: ubuntu-24.04
-    environment: staging
-    outputs:
-      app_port: ${{ steps.vars.outputs.app_port }}
-      health_port: ${{ steps.vars.outputs.health_port }}
-      db_pj_port: ${{ steps.vars.outputs.db_pj_port }}
-      db_user: ${{ steps.vars.outputs.db_user }}
-      db_pj_name: ${{ steps.vars.outputs.db_pj_name }}
-
-    steps:
-      - name: Export environment variables
-        id: vars
-        run: |
-          echo "app_port=${{ vars.APP_PORT }}" >> $GITHUB_OUTPUT
-          echo "health_port=${{ vars.HEALTH_PORT }}" >> $GITHUB_OUTPUT
-          echo "db_pj_port=${{ vars.DB_PJ_PORT }}" >> $GITHUB_OUTPUT
-          echo "db_user=${{ vars.DB_USER }}" >> $GITHUB_OUTPUT
-          echo "db_pj_name=${{ vars.DB_PJ_NAME }}" >> $GITHUB_OUTPUT
-
   runtime_validation_grpc_smoke_load:
     name: "Runtime Validation — gRPC Smoke"
     needs: [staging_gate]
@@ -65,8 +43,4 @@ jobs:
       sql_password: ${{ secrets.SQL_PASSWORD }}
     with:
       ref: ${{ github.event.pull_request.head.sha }}
-      app_port: ${{ needs.staging_gate.outputs.app_port }}
-      health_port: ${{ needs.staging_gate.outputs.health_port }}
-      db_pj_port: ${{ needs.staging_gate.outputs.db_pj_port }}
-      db_user: ${{ needs.staging_gate.outputs.db_user }}
-      db_pj_name: ${{ needs.staging_gate.outputs.db_pj_name }}
+      environment: staging
