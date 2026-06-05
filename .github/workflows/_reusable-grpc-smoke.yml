@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: pr-develop-smoke-${{ inputs.ref }}
+  cancel-in-progress: true
+
 jobs:
   grpc_smoke:
     name: "Runtime Validation — gRPC Smoke"
@@ -32,7 +36,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ inputs.ref }}
 
       - name: Setup Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
@@ -49,12 +53,8 @@ jobs:
 
       - name: gRPC smoke (health)
         run: |
-          for i in $(seq 1 30); do
-            if grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check >/dev/null 2>&1; then
-              break
-            fi
-          done
-          grpcurl -plaintext localhost:${APP_PORT} grpc.health.v1.Health/Check
+          chmod +x command/ci/grpc-smoke.sh
+          command/ci/grpc-smoke.sh
 
       - name: Compose down
         if: always()

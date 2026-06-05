@@ -6,6 +6,12 @@ on:
       ref:
         required: true
         type: string
+      base_sha:
+        required: true
+        type: string
+      head_sha:
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -18,6 +24,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref }}
 
       - name: Setup node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
@@ -30,6 +37,6 @@ jobs:
       - name: Validate commit messages
         run: |
           npx commitlint --config=config/.commitlintrc.json \
-                        --from ${{ github.event.pull_request.base.sha }} \
-                        --to ${{ github.event.pull_request.head.sha }} \
+                        --from ${{ inputs.base_sha }} \
+                        --to ${{ inputs.head_sha }} \
                         --verbose
