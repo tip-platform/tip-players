@@ -35,10 +35,23 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha }}
 
+  staging_gate:
+    name: "Staging Gate — Unlock Environment"
+    needs: [build_verification_compile]
+    runs-on: ubuntu-24.04
+    environment: staging
+    outputs:
+      app_port: ${{ vars.APP_PORT }}
+      health_port: ${{ vars.HEALTH_PORT }}
+      db_pj_port: ${{ vars.DB_PJ_PORT }}
+      db_user: ${{ vars.DB_USER }}
+      db_pj_name: ${{ vars.DB_PJ_NAME }}
+    steps:
+      - run: echo "staging unlocked"
+
   runtime_validation_grpc_smoke_load:
     name: "Runtime Validation — gRPC Smoke"
-    environment: staging
-    needs: [build_verification_compile]
+    needs: [staging_gate]
     uses: ./.github/workflows/_reusable-grpc-smoke.yml
     secrets:
       sql_password: ${{ secrets.SQL_PASSWORD }}
