@@ -1,0 +1,41 @@
+name: "PR (develop) — Quality Gates"
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened, edited]
+
+concurrency:
+  group: pr-develop-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scm_policy:
+    name: "Conventional Commits"
+    uses: ./.github/workflows/_reusable-commitlint.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+
+  verification_compile:
+    name: "Build Verification — Compile"
+    needs: [scm_policy]
+    uses: ./.github/workflows/_reusable-build-compile.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+
+  static_code_quality:
+    name: "golangci-lint"
+    needs: [scm_policy]
+    uses: ./.github/workflows/_reusable-golangci_lint.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+
+  runtime_smoke_load:
+    name: "Runtime Validation — gRPC Smoke"
+    needs: [build_verification_compile]
+    uses: ./.github/workflows/_reusable-grpc-smoke.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}

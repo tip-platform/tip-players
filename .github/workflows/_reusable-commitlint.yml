@@ -1,19 +1,17 @@
-name: "PR (develop) — Conventional Commits"
+name: "Conventional Commits"
 
 on:
-  pull_request:
-    branches: [develop]
-    types: [opened, synchronize, reopened, edited]
-
-concurrency:
-  group: pr-develop-${{ github.event.workflow_run.head_sha }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
-  scm_policy_conventional_commits:
+  conventional_commits:
     name: "SCM Policy — Conventional Commits"
     runs-on: ubuntu-24.04
     steps:
