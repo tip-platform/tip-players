@@ -1,4 +1,4 @@
-name: "Conventional Commits"
+name: conventional_commits
 
 on:
   workflow_call:
@@ -17,8 +17,8 @@ permissions:
   contents: read
 
 jobs:
-  conventional_commits:
-    name: "SCM Policy — Conventional Commits"
+  commitlint:
+    name: Commilint
     runs-on: ubuntu-24.04
     steps:
       - uses: ./.github/actions/setup-checkout

@@ -1,4 +1,4 @@
-name: "Golangci-lint"
+name: golangci_lint
 
 on:
   workflow_call:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   golangci_lint:
-    name: "Static Code Quality — golangci-lint"
+    name: Go linter
     runs-on: ubuntu-24.04
     steps:
       - uses: ./.github/actions/setup-checkout
