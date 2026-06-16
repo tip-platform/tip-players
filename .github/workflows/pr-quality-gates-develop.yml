@@ -36,8 +36,8 @@ jobs:
       ref: ${{ github.event.pull_request.head.sha }}
 
   runtime_validation_grpc_smoke_load:
+    needs: [build_verification_compile, static_code_quality_golangci_lint]
     name: "Runtime Validation — gRPC Smoke"
-    needs: [staging_gate]
     uses: ./.github/workflows/_reusable-grpc-smoke.yml
     secrets:
       sql_password: ${{ secrets.SQL_PASSWORD }}

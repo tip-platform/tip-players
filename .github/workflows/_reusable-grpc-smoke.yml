@@ -12,9 +12,11 @@ on:
 
 permissions:
   contents: read
+
 concurrency:
   group: pr-develop-smoke-${{ inputs.ref }}
   cancel-in-progress: true
+
 jobs:
   grpc_smoke:
     name: "Runtime Validation — gRPC Smoke"
@@ -34,47 +36,36 @@ jobs:
       DB_PJ_NAME: ${{ vars.DB_PJ_NAME }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        with:
-          fetch-depth: 0
-          ref: ${{ inputs.ref }}
+      - uses: ./.github/actions/setup-checkout
 
-      - name: Setup Go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
-        with:
-          go-version-file: go.mod
-          cache: true
+      - uses: ./.github/actions/setup-go
 
       - name: Install grpc tooling (grpcurl)
         run: |
           go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.9.3
 
-      - name: Set minimal permissions for CI scripts
-        shell: bash
-        run: |
-          chmod 500 command/ci/env-validate.sh
-          chmod 500 command/ci/env-create.sh
-          chmod 500 command/ci/compose-up.sh
-          chmod 500 command/ci/grpc-smoke.sh
-          chmod 500 command/ci/compose-down-and-clean.sh
-
       - name: Validate staging vars/secrets
-        shell: bash
-        run: command/ci/env-validate.sh
+        uses: ./.github/actions/scripting
+        with:
+          script: env-validate.sh
 
       - name: Create .env (temporary)
-        shell: bash
-        run: command/ci/env-create.sh
+        uses: ./.github/actions/scripting
+        with:
+          script: env-create.sh
 
       - name: Compose up (build + start)
-        shell: bash
-        run: command/ci/compose-up.sh
+        uses: ./.github/actions/scripting
+        with:
+          script: compose-up.sh
 
       - name: gRPC smoke (health)
-        shell: bash
-        run: command/ci/grpc-smoke.sh
+        uses: ./.github/actions/scripting
+        with:
+          script: grpc-smoke.sh
 
       - name: Compose down + cleanup
+        uses: ./.github/actions/scripting
         if: always()
-        shell: bash
-        run: command/ci/compose-down-and-clean.sh
+        with:
+          script: compose-down-and-clean.sh
