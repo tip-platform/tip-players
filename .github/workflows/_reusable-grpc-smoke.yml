@@ -39,7 +39,10 @@ jobs:
       DB_PJ_NAME: ${{ vars.DB_PJ_NAME }}
 
     steps:
-      - uses: ./.github/actions/setup-checkout
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: ./.github/actions/setup-go
 
