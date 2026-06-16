@@ -1,0 +1,21 @@
+name: "Setup Go"
+
+description: "actions/setup-go with go.mod and cache"
+
+inputs:
+  go-version-file:
+    description: "go.mod"
+    required: false
+    default: "go.mod"
+  cache:
+    description: "cache"
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
+      with:
+        go-version-file: ${{ inputs.go-version-file }}
+        cache: ${{ inputs.cache }}

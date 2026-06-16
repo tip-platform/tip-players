@@ -20,7 +20,7 @@ jobs:
     name: "Container/Image Vulnerability Scanning — Trivy"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -28,7 +28,7 @@ jobs:
         run: docker build -t repo-scan:${{ github.sha }} -f build/ContainerFile .
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: repo-scan:${{ github.sha }}
           format: sarif
@@ -39,7 +39,7 @@ jobs:
           output: trivy-results.sarif
 
       - name: Trivy — upload results to GitHub Security
-        uses: github/codeql-action/upload-sarif@84498526a009a99c875e83ef4821a8ba52de7c22
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: trivy-results.sarif
@@ -49,12 +49,12 @@ jobs:
     name: "SAST — SonarQube"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: "aws connection service"
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           audience: sts.amazonaws.com
           role-to-assume: arn:aws:iam::006834263887:role/github-actions-tip-players
@@ -70,7 +70,7 @@ jobs:
           echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
 
       - name: SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995
+        uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
         with:

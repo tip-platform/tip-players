@@ -1,0 +1,19 @@
+name: "CI Scripts — chmod + exec"
+
+description: "Apply sucrity scripting CI"
+
+inputs:
+  script:
+    required: true
+    description: "Script"
+
+runs:
+  using: composite
+  steps:
+    - name: set minimal permissions for ci script
+      shell: bash
+      run: chmod 500 command/ci/${{ inputs.script }}
+
+    - name: Execute Script
+      shell: bash
+      run: command/ci/${{ inputs.script }}
