@@ -2,6 +2,9 @@ name: grpc_smoke
 
 on:
   workflow_call:
+    secrets:
+      SQL_PASSWORD:
+        required: true
     inputs:
       ref:
         required: true
