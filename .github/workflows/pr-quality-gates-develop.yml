@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   scm_policy_conventional_commits:
-    name: "SCM Policy — Conventional Commits"
+    name: SCM_Policy
     uses: ./.github/workflows/_reusable-commitlint.yml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
@@ -22,14 +22,14 @@ jobs:
       head_sha: ${{ github.event.pull_request.head.sha }}
 
   build_verification_compile:
-    name: "Build Verification — Compile"
+    name: Build_Verification
     needs: [scm_policy_conventional_commits]
     uses: ./.github/workflows/_reusable-build-compile.yml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
 
   static_code_quality_golangci_lint:
-    name: "Static Code Quality — golangci-lint"
+    name: Static_Code_Quality
     needs: [scm_policy_conventional_commits]
     uses: ./.github/workflows/_reusable-golangci_lint.yml
     with:
@@ -37,7 +37,7 @@ jobs:
 
   runtime_validation_grpc_smoke_load:
     needs: [build_verification_compile, static_code_quality_golangci_lint]
-    name: "Runtime Validation — gRPC Smoke"
+    name: Runtime_Validation
     uses: ./.github/workflows/_reusable-grpc-smoke.yml
     secrets:
       sql_password: ${{ secrets.SQL_PASSWORD }}

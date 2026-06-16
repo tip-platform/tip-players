@@ -1,4 +1,4 @@
-name: "Runtime Validation"
+name: grpc_smoke
 
 on:
   workflow_call:

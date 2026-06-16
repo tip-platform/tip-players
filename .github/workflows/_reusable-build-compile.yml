@@ -1,4 +1,4 @@
-name: "_reusable — Build Compile"
+name: compile
 
 on:
   workflow_call:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   compile:
-    name: "Build Verification — Compile"
+    name: Compile
     runs-on: ubuntu-24.04
     steps:
       - uses: ./.github/actions/setup-checkout
