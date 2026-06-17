@@ -36,6 +36,7 @@ services:
       - MSSQL_PID=Developer
       - HC_USER=${DB_USER}
       - HC_PASS=${SQL_PASSWORD}
+      - GRPC_REFLECTION_ENABLED=${GRPC_REFLECTION_ENABLED}
 
     volumes:
       - player_data:/var/opt/mssql
@@ -44,7 +45,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "/opt/mssql-tools18/bin/sqlcmd -U $$HC_USER -P \"$$HC_PASS\" -C -Q \"SELECT 1\"",
+          '/opt/mssql-tools18/bin/sqlcmd -U \"$$HC_USER\" -P \"$$HC_PASS\" -C -Q "SELECT 1"',
         ]
 
       interval: 10s
