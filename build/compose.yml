@@ -25,7 +25,7 @@ services:
     container_name: mssql_player_db
     image: mcr.microsoft.com/mssql/server:2025-latest
     stop_grace_period: 5s
-    restart: unless-stopped
+    restart: ${COMPOSE_RESTART_POLICY:-unless-stopped}
 
     ports:
       - "127.0.0.1:${DB_PJ_PORT}:1433"
@@ -54,7 +54,8 @@ services:
 
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
     networks:
       - backend_network
