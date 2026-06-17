@@ -45,7 +45,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          '/opt/mssql-tools18/bin/sqlcmd -U \"$$HC_USER\" -P \"$$HC_PASS\" -C -Q "SELECT 1"',
+          "/opt/mssql-tools18/bin/sqlcmd -U \"$$HC_USER\" -P \"$$HC_PASS\" -C -Q "SELECT 1"",
         ]
 
       interval: 10s
