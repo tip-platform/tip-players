@@ -7,8 +7,9 @@ set -euo pipefail
 : "${APP_PORT:?APP_PORT is required}"
 
 SUCCESS=false
-for i in $(seq 1 30); do
-  if grpcurl -plaintext "localhost:${APP_PORT}" grpc.health.v1.Health/Check >/dev/null 2>&1; then
+
+for _ in $(seq 1 30); do
+  if grpcurl -plaintext "localhost:${APP_PORT}" grpc.health.v1.Health/Check; then
     SUCCESS=true
     break
   fi
