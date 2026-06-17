@@ -38,6 +38,7 @@ jobs:
       DB_USER: ${{ vars.DB_USER }}
       SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
       DB_PJ_NAME: ${{ vars.DB_PJ_NAME }}
+      GRPC_REFLECTION_ENABLED: "true"
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
