@@ -34,6 +34,7 @@ jobs:
       HEALTH_ADDR: :8080
       HEALTH_ENABLED: "true"
       APP_ENV: staging
+      COMPOSE_RESTART_POLICY: no
       DB_USER: ${{ vars.DB_USER }}
       SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
       DB_PJ_NAME: ${{ vars.DB_PJ_NAME }}
