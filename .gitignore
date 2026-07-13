@@ -1,5 +1,6 @@
 # Environment / local secrets
 .env
+.envrc
 
 # IntelliJ HTTP Client environments (often contain tokens)
 http-client.env.json
@@ -20,3 +21,23 @@ dist/
 
 # Policy AWS
 config/policy.json
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Terragrunt
+.terraform.lock.hcl
+.terragrunt-cache/
