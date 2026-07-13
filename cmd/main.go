@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "github.com/tip-platform/tip-players/api/proto"
+	pb "github.com/tip-platform/tip-players/api/proto/player/v1"
 	"github.com/tip-platform/tip-players/internal/infra/driver/config"
 	"github.com/tip-platform/tip-players/internal/infra/driver/di"
 	"github.com/tip-platform/tip-players/internal/infra/driver/health"
