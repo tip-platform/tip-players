@@ -1,0 +1,73 @@
+services:
+  redis-infisical:
+    container_name: redis_infisical
+    image: redis:8.8.0-alpine3.23
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+    environment:
+      - ALLOW_EMPTY_PASSWORD
+
+    networks:
+      - infisical_net
+
+  postgres-infisical:
+    container_name: postgres_infisical
+    image: postgres:15.18-alpine3.24
+    stop_grace_period: 5s
+    restart: ${COMPOSE_RESTART_POLICY:-unless-stopped}
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U infisical -d infisical"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    environment:
+      - POSTGRES_USER=infisical
+      - POSTGRES_PASSWORD=${INFISICAL_DB_PASSWORD}
+      - POSTGRES_DB=infisical
+
+    volumes:
+      - infisical_pg_data:/var/lib/postgresql/data
+
+    networks:
+      - infisical_net
+
+  secret-vault:
+    container_name: infisical_secret
+    image: infisical/infisical:v0.162.2
+    restart: unless-stopped
+
+    environment:
+      - AUTH_SECRET
+      - ENCRYPTION_KEY
+      - REDIS_URL=redis://redis-infisical:6379
+      - SITE_URL
+      - DB_CONNECTION_URI
+
+    depends_on:
+      postgres-infisical:
+        condition: service_healthy
+      redis-infisical:
+        condition: service_healthy
+
+    ports:
+      - "127.0.0.1:${BOX_PORT}:8080"
+
+    networks:
+      - infisical_net
+
+networks:
+  infisical_net:
+    driver: bridge
+
+volumes:
+  infisical_pg_data:

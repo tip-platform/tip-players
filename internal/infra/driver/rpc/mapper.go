@@ -2,7 +2,7 @@
 package rpc
 
 import (
-	pb "github.com/tip-platform/tip-players/api/proto"
+	pb "github.com/tip-platform/tip-players/api/proto/player/v1"
 	"github.com/tip-platform/tip-players/internal/domain/schema"
 )
 
