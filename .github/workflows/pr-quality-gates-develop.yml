@@ -10,7 +10,10 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  id-token: write
   contents: read
+  security-events: write
+  actions: read
 
 jobs:
   scm_policy_conventional_commits:
@@ -44,3 +47,68 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha }}
       environment: staging
+
+  container_image_vulnerability_scanning:
+    name: "Container/Image Vulnerability Scanning — Trivy"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Build an image from Dockerfile
+        run: docker build -t repo-scan:${{ github.sha }} -f build/ContainerFile .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: repo-scan:${{ github.sha }}
+          format: sarif
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: true
+          exit-code: 1
+          vuln-type: "os,library"
+          output: trivy-results.sarif
+
+      - name: Trivy — upload results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
+
+  sast_sonarqube:
+    name: "SAST — SonarQube"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: "aws connection service"
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          audience: sts.amazonaws.com
+          role-to-assume: arn:aws:iam::006834263887:role/github-actions-tip-players
+          aws-region: us-east-2
+
+      - name: Load SONAR_TOKEN Secrets Manager
+        run: |
+          SECRET_JSON=$(aws secretsmanager get-secret-value \
+            --secret-id "tip-players/config" \
+            --query "SecretString" \
+            --output text)
+          SONAR_TOKEN=$(echo $SECRET_JSON | jq -r '.SONAR_TOKEN')
+          echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+        with:
+          args: >-
+            -Dsonar.organization=tip-platform
+            -Dsonar.projectName=tip-platform
+            -Dsonar.projectKey=tip-platform
+            -Dsonar.sources=cmd,internal
+            -Dsonar.verbose=true
